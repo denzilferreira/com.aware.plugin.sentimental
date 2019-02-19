@@ -1,18 +1,16 @@
 apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion compile_sdk
     defaultConfig {
         applicationId "com.aware.plugin.sentimental"
-        minSdkVersion 19
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        minSdkVersion minimum_sdk
+        targetSdkVersion target_sdk
+        versionCode version_code
+        versionName version_readable
     }
     buildTypes {
         release {
@@ -33,6 +31,5 @@ configurations.all {
 
 dependencies {
     implementation"org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    
     api "com.github.denzilferreira:aware-client:$aware_libs"
 }
