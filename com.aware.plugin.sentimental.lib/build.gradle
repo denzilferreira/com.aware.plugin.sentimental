@@ -51,15 +51,7 @@ android {
     }
 }
 
-repositories {
-    maven { url 'https://jitpack.io' } //this allows library generation directly from GitHub source-code
-}
-
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
 dependencies {
     implementation"org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    api "com.github.denzilferreira:aware-client:$aware_libs"
+    api project(":aware-core")
 }

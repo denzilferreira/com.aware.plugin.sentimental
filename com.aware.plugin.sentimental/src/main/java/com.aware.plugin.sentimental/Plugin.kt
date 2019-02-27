@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import com.aware.Applications
 import com.aware.Aware
+import com.aware.Aware_Preferences
 import com.aware.providers.Applications_Provider
 import com.aware.providers.Keyboard_Provider
 import com.aware.utils.Aware_Plugin
@@ -30,7 +31,12 @@ class Plugin : Aware_Plugin() {
         super.onStartCommand(intent, flags, startId)
 
         if (PERMISSIONS_OK) {
+
+            DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true")
+            Aware.setSetting(this, Settings.STATUS_PLUGIN_SENTIMENTAL, true)
+
             if (Applications.isAccessibilityServiceActive(this)) {
+
                 Aware.startKeyboard(this)
                 Applications.setSensorObserver(object : Applications.AWARESensorObserver {
                     override fun onCrash(data: ContentValues?) {}
@@ -51,13 +57,14 @@ class Plugin : Aware_Plugin() {
                             currentForeground = currentApp
                         } else {
                             if (!textBuffer.isEmpty() && awareSensor != null) {
+
                                 val contentValues = ContentValues()
                                 contentValues.put(Plugin.PACKAGE_NAME, currentForeground)
                                 contentValues.put(Plugin.TYPED_TEXT, textBuffer)
+
                                 (awareSensor as AWARESensorObserver).onTextContextChanged(contentValues)
 
-                                if (Aware.DEBUG)
-                                    Log.d("Sentimental", "onTextContextChanged -> ${contentValues.toString()}")
+                                if (DEBUG) Log.d("Sentimental", "onTextContextChanged -> ${contentValues.toString()}")
                             }
                             textBuffer = ""
                             currentForeground = ""
@@ -72,6 +79,9 @@ class Plugin : Aware_Plugin() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        Aware.setSetting(this, Settings.STATUS_PLUGIN_SENTIMENTAL, false)
+        Aware.stopKeyboard(this)
     }
 
     private var awareSensor: AWARESensorObserver? = null

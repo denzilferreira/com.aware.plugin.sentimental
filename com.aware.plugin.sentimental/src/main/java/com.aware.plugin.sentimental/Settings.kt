@@ -7,8 +7,9 @@ import android.preference.EditTextPreference
 import android.preference.PreferenceActivity
 import android.preference.PreferenceManager
 import com.aware.Aware
+import com.aware.ui.AppCompatPreferenceActivity
 
-class Settings : PreferenceActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
+class Settings : AppCompatPreferenceActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {
         val STATUS_PLUGIN_SENTIMENTAL = "status_plugin_sentimental"
