@@ -76,7 +76,7 @@ open class Plugin : Aware_Plugin() {
                         val packagesOfInterest = Aware.getSetting(applicationContext, Settings.PLUGIN_SENTIMENTAL_PACKAGES).split(",")
                         if (packagesOfInterest.contains(data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME))) {
                             keyboardInApp = data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME)
-                            textBuffer = data.getAsString(Keyboard_Provider.Keyboard_Data.CURRENT_TEXT)
+                            textBuffer =textBuffer.plus(". ").plus(data.getAsString(Keyboard_Provider.Keyboard_Data.CURRENT_TEXT))
                         }
                     }
 
