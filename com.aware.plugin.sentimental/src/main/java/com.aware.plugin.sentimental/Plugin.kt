@@ -63,7 +63,15 @@ open class Plugin : Aware_Plugin() {
         if (PERMISSIONS_OK) {
 
             DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true")
-            Aware.setSetting(this, Settings.STATUS_PLUGIN_SENTIMENTAL, true)
+
+            if (Aware.getSetting(applicationContext, Settings.STATUS_PLUGIN_SENTIMENTAL).isEmpty()) {
+                Aware.setSetting(applicationContext, Settings.STATUS_PLUGIN_SENTIMENTAL, true)
+            } else {
+                if (Aware.getSetting(applicationContext, Settings.STATUS_PLUGIN_SENTIMENTAL).equals("false", ignoreCase = true)) {
+                    Aware.stopPlugin(applicationContext, packageName)
+                    return Service.START_STICKY
+                }
+            }
 
             if (Applications.isAccessibilityServiceActive(this)) {
                 Aware.setSetting(this, Aware_Preferences.STATUS_APPLICATIONS, true)
