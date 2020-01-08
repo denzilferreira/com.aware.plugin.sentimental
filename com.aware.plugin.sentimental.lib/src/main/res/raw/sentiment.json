@@ -1,0 +1,34 @@
+{
+  "Categories":["Common","Friendship","Greeting"],
+  "Words":[
+    {
+      "Identifier":"ID1",
+      "Word":"Hello",
+      "Weights":[
+        {
+          "Category":"Common",
+          "Weight":1
+        },
+        {
+          "Category":"Greeting",
+          "Weight":2
+        }
+      ]
+    },
+    {
+      "Identifier":"ID2",
+      "Word":"Hi*",
+      "Weights":[
+        {
+          "Category":"Common",
+          "Weight":1
+        },
+        {
+          "Category":"Greeting",
+          "Weight":2
+        }
+      ]
+    }
+
+  ]
+}
