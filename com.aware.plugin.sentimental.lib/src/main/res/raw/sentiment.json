@@ -1,34 +1,13 @@
 {
-  "Categories":["Common","Friendship","Greeting"],
-  "Words":[
-    {
-      "Identifier":"ID1",
-      "Word":"Hello",
-      "Weights":[
-        {
-          "Category":"Common",
-          "Weight":1
-        },
-        {
-          "Category":"Greeting",
-          "Weight":2
-        }
-      ]
+  "Categories":["Common","Friendship","Greeting","Time"],
+  "Words":{
+    "hello*":{
+      "Greeting": 1,
+      "Common": 2
     },
-    {
-      "Identifier":"ID2",
-      "Word":"Hi*",
-      "Weights":[
-        {
-          "Category":"Common",
-          "Weight":1
-        },
-        {
-          "Category":"Greeting",
-          "Weight":2
-        }
-      ]
+    "day": {
+      "Time": 3,
+      "Greeting": 1
     }
-
-  ]
+  }
 }
