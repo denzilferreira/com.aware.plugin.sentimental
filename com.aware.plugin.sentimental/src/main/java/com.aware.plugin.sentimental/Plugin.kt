@@ -1,9 +1,8 @@
 package com.aware.plugin.sentimental
 
 import android.app.Service
-import android.content.ContentValues
-import android.content.Context
-import android.content.Intent
+import android.content.*
+import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import com.aware.Applications
@@ -13,6 +12,12 @@ import com.aware.providers.Applications_Provider
 import com.aware.providers.Keyboard_Provider
 import com.aware.utils.Aware_Plugin
 import com.aware.plugin.sentimental.*
+import org.json.JSONObject
+import java.util.HashMap
+//import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 open class Plugin : Aware_Plugin() {
 
@@ -91,6 +96,11 @@ open class Plugin : Aware_Plugin() {
                 Log.i("ABTest", "Sentiment object is ");
 
                 Log.i("ABTest", Sentiment.dictionaryAsString);
+                //val testHash = Sentiment.getScoreFromInput("day hello1 there");
+                //for ((key, value) in testHash) {
+                //    Log.i("ABTest", key.toString() + " " + value.toString())
+                //}
+
                 Applications.setSensorObserver(object : Applications.AWARESensorObserver {
 
                     override fun onCrash(data: ContentValues?) {}
@@ -114,6 +124,7 @@ open class Plugin : Aware_Plugin() {
 
                                 Log.i("ABTest","After corrections prev text is");
                                 Log.i("ABTest",textBufferNew);
+                                val testHash = Sentiment.getScoreFromInput(textBufferNew);
                             }
                             textBufferNew= tempCurrTextBuffer;
                             prevTextBuffer = tempTextBuffer;
@@ -136,6 +147,9 @@ open class Plugin : Aware_Plugin() {
 
                             Plugin.awareSensor?.onTextContextChanged(contentValues)
                             Log.i("ABTest","Echoed before reset"+textBufferNew);
+                            if (textBufferNew.length>0){
+                                val testHash = Sentiment.getScoreFromInput(textBufferNew);
+                            }
                             textBuffer = ""
                             textBufferNew = ""
                             prevTextBuffer = "";
@@ -143,6 +157,20 @@ open class Plugin : Aware_Plugin() {
                         }
                     }
                 })
+            }
+
+            if (Aware.isStudy(this)) {
+                val aware_account = Aware.getAWAREAccount(applicationContext)
+                val authority = Provider.getAuthority(applicationContext)
+                val frequency = java.lang.Long.parseLong(Aware.getSetting(this, Aware_Preferences.FREQUENCY_WEBSERVICE)) * 60
+
+                ContentResolver.setIsSyncable(aware_account, authority, 1)
+                ContentResolver.setSyncAutomatically(aware_account, authority, true)
+                val request = SyncRequest.Builder()
+                        .syncPeriodic(frequency, frequency / 3)
+                        .setSyncAdapter(aware_account, authority)
+                        .setExtras(Bundle()).build()
+                ContentResolver.requestSync(request)
             }
         }
 
@@ -154,5 +182,12 @@ open class Plugin : Aware_Plugin() {
         Aware.setSetting(this, Aware_Preferences.STATUS_APPLICATIONS, false)
         Aware.setSetting(this, Settings.STATUS_PLUGIN_SENTIMENTAL, false)
         Aware.stopKeyboard(this)
+
+        ContentResolver.setSyncAutomatically(Aware.getAWAREAccount(this), Provider.getAuthority(this), false);
+        ContentResolver.removePeriodicSync(
+                Aware.getAWAREAccount(this),
+                Provider.getAuthority(this),
+                Bundle.EMPTY
+        );
     }
 }
