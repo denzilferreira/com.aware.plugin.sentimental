@@ -1,0 +1,13 @@
+{
+  "Categories":["Common","Friendship","Greeting","Time"],
+  "Words":{
+    "hello*":{
+      "Greeting": 1,
+      "Common": 2
+    },
+    "day": {
+      "Time": 3,
+      "Greeting": 1
+    }
+  }
+}
