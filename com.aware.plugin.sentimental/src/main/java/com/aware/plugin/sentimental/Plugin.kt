@@ -1,5 +1,6 @@
 package com.aware.plugin.sentimental
 
+//import androidx.core.content.ContextCompat.getSystemService
 import android.app.Service
 import android.content.*
 import android.os.Bundle
@@ -11,12 +12,6 @@ import com.aware.Aware_Preferences
 import com.aware.providers.Applications_Provider
 import com.aware.providers.Keyboard_Provider
 import com.aware.utils.Aware_Plugin
-import com.aware.plugin.sentimental.*
-import org.json.JSONObject
-import java.util.HashMap
-//import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
 
 
 open class Plugin : Aware_Plugin() {
@@ -29,7 +24,7 @@ open class Plugin : Aware_Plugin() {
             fun onTextContextChanged(data: ContentValues)
         }
 
-        var awareSensor: AWARESensorObserver ?= null
+        var awareSensor: AWARESensorObserver? = null
 
         fun setSensorObserver(observer: AWARESensorObserver) {
             awareSensor = observer
@@ -51,7 +46,6 @@ open class Plugin : Aware_Plugin() {
     var installedKeyboards = ""
 
 
-
     /**
      * Where we keep the buffer of written text
      */
@@ -59,10 +53,10 @@ open class Plugin : Aware_Plugin() {
     //adding variable that is overwritten to store final text value without edits
     var textBufferNew = ""
     //adding variable for previous text
-    var prevTextBuffer =""
+    var prevTextBuffer = ""
 
     override fun onCreate() {
-        Log.i("ABTest","This is echoed on create");
+        Log.i("ABTest", "This is echoed on create");
         super.onCreate()
         TAG = "AWARE: Sentimental"
 
@@ -72,7 +66,7 @@ open class Plugin : Aware_Plugin() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        Log.i("ABTest","This is echoed on start");
+        Log.i("ABTest", "This is echoed on start");
         if (PERMISSIONS_OK) {
 
             DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true")
@@ -85,14 +79,14 @@ open class Plugin : Aware_Plugin() {
                     return Service.START_STICKY
                 }
             }
-            Log.i("ABTest","this is echoed if permissions are correct");
+            Log.i("ABTest", "this is echoed if permissions are correct");
             if (Applications.isAccessibilityServiceActive(this)) {
                 Log.i("ABTest", "This is echoed before set sensor observer");
                 Aware.setSetting(this, Aware_Preferences.STATUS_APPLICATIONS, true)
                 Aware.startKeyboard(this);
 
                 //load dictionary
-                val Sentiment =SentimentAnalysis(this).getInstance();
+                val Sentiment = SentimentAnalysis(this).getInstance();
                 Log.i("ABTest", "Sentiment object is ");
 
                 Log.i("ABTest", Sentiment.dictionaryAsString);
@@ -108,48 +102,58 @@ open class Plugin : Aware_Plugin() {
                     override fun onBackground(data: ContentValues?) {}
                     override fun onKeyboard(data: ContentValues?) {
                         val packagesOfInterest = Aware.getSetting(applicationContext, Settings.PLUGIN_SENTIMENTAL_PACKAGES).split(",")
-                        Log.i("ABTest","package data is "+data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME));
+                        Log.i("ABTest", "package data is " + data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME));
                         if (packagesOfInterest.contains(data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME))) {
+
                             keyboardInApp = data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME)
-                            textBuffer =textBuffer.plus(". ").plus(data.getAsString(Keyboard_Provider.Keyboard_Data.CURRENT_TEXT))
-                            var tempCurrTextBuffer=data.getAsString(Keyboard_Provider.Keyboard_Data.CURRENT_TEXT);
-                            var tempTextBuffer=data.getAsString(Keyboard_Provider.Keyboard_Data.BEFORE_TEXT);
-                            Log.i("ABTest","Current Text is ");
-                            Log.i("ABTest",tempCurrTextBuffer);
-                            Log.i("ABTest","Before text is");
-                            Log.i("ABTest",tempTextBuffer);
+                            textBuffer = textBuffer.plus(". ").plus(data.getAsString(Keyboard_Provider.Keyboard_Data.CURRENT_TEXT))
+
+                            val tempCurrTextBuffer = data.getAsString(Keyboard_Provider.Keyboard_Data.CURRENT_TEXT);
+                            val tempTextBuffer = data.getAsString(Keyboard_Provider.Keyboard_Data.BEFORE_TEXT);
+
+                            Log.i("ABTest", "Current Text is ");
+                            Log.i("ABTest", tempCurrTextBuffer);
+                            Log.i("ABTest", "Before text is");
+                            Log.i("ABTest", tempTextBuffer);
+
                             //log only when input ends for corrected text values only
                             // this happens when prevTextBuffer has 0 length and textBufferNew has length>0
-                            if (tempCurrTextBuffer.length>0 && tempTextBuffer.length==0){
-
-                                Log.i("ABTest","After corrections prev text is");
-                                Log.i("ABTest",textBufferNew);
+                            if (tempCurrTextBuffer.length > 0 && tempTextBuffer.length == 0) {
+                                Log.i("ABTest", "After corrections prev text is");
+                                Log.i("ABTest", textBufferNew);
                                 val testHash = Sentiment.getScoreFromInput(textBufferNew);
                             }
-                            textBufferNew= tempCurrTextBuffer;
+                            textBufferNew = tempCurrTextBuffer;
                             prevTextBuffer = tempTextBuffer;
-
-
                         }
                     }
 
                     override fun onTouch(data: ContentValues?) {}
                     override fun onForeground(data: ContentValues?) {
-                        Log.i("ABTest","echoed on foreground");
+                        Log.i("ABTest", "echoed on foreground");
                         val currentApp = data!!.getAsString(Applications_Provider.Applications_Foreground.PACKAGE_NAME)
                         if (installedKeyboards.contains(currentApp)) return //we ignore foreground package of keyboard input
 
                         if (!textBuffer.isEmpty() && currentApp != keyboardInApp) { //we were using an app of interest and changed app
 
-                            val contentValues = ContentValues()
-                            contentValues.put(Plugin.PACKAGE_NAME, keyboardInApp)
-                            contentValues.put(Plugin.TYPED_TEXT, textBuffer)
+                            Log.i("ABTest", "Echoed before reset" + textBufferNew);
 
-                            Plugin.awareSensor?.onTextContextChanged(contentValues)
-                            Log.i("ABTest","Echoed before reset"+textBufferNew);
-                            if (textBufferNew.length>0){
-                                val testHash = Sentiment.getScoreFromInput(textBufferNew);
+                            val testHash = Sentiment.getScoreFromInput(textBufferNew);
+
+                            val contentValues = ContentValues()
+                            contentValues.put(Provider.Sentimental_Data.TIMESTAMP, System.currentTimeMillis())
+                            contentValues.put(Provider.Sentimental_Data.DEVICE_ID, Aware.getSetting(applicationContext, Aware_Preferences.DEVICE_ID))
+                            contentValues.put(Provider.Sentimental_Data.APP_NAME, keyboardInApp)
+
+                            for ((category, score) in testHash) {
+                                contentValues.put(Provider.Sentimental_Data.WORD_CATEGORY, category as String)
+                                contentValues.put(Provider.Sentimental_Data.SENTIMENT_SCORE, score as Double)
+
+                                contentResolver.insert(Provider.Sentimental_Data.CONTENT_URI, contentValues) //does the actual data insert
+
+                                awareSensor?.onTextContextChanged(contentValues)
                             }
+
                             textBuffer = ""
                             textBufferNew = ""
                             prevTextBuffer = "";
