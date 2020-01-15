@@ -10,7 +10,7 @@
     <EditTextPreference
             android:key="plugin_sentimental_packages"
             android:persistent="true"
-            android:summary="Only monitor text input on these application package names."
+            android:summary="Only monitor text input on these application package names. If left blank, it will perform sentiment analysis on text input in all apps."
             android:title="Enabled Packages"
     />
 </PreferenceScreen>
