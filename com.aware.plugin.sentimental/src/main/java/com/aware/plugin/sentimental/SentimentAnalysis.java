@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 import com.aware.Aware;
 
@@ -45,7 +46,17 @@ public class SentimentAnalysis {
 
         }
     }
-	
+	public void resetScore(){
+        //method to reset score when package is swicthed
+        // Getting an iterator
+        Set<String> keys = CalcScore.keySet();
+        for(String key: keys){
+            CalcScore.replace(key,0.0);
+        }
+
+
+
+    }
 	//function to read json file to string
 	public String loadJSONFromAsset(Context context) {
         String json = null;
@@ -87,12 +98,15 @@ public class SentimentAnalysis {
         if (targetWord.contains("*")){
             //do regexp compare of strings
             //String escapeMask=targetWord.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, "\\$&");
-            String regexString=targetWord.replace("*", "(.*)");
-            boolean test=inpWord.matches(regexString);
+            String regexString=targetWord.replace("*", ".*");
+            boolean test=inpWord.matches("(?i:"+regexString+")");
+            if (test){
+                Log.i("ABTest","wildcard match inp is "+inpWord +" and tgt word is "+targetWord);
+            }
             return test;
         } else {
-            Log.i("ABTest","inp is "+inpWord +" and tgt word is "+targetWord);
-            if (inpWord==targetWord){
+            if (inpWord.equalsIgnoreCase(targetWord)){
+                Log.i("ABTest","exact match inp is "+inpWord +" and tgt word is "+targetWord);
                 return true;
             } else {
                 return false;
@@ -110,7 +124,7 @@ public class SentimentAnalysis {
             while(wordList.hasNext()) {
                 String wordItem = wordList.next().toString();
                 //System.out.println("key is "+wordItem + " ");
-                Log.i("ABTest","word in dictionary is "+wordItem);
+                //Log.i("ABTest","word in dictionary is "+wordItem);
                 JSONObject WordScores= WordObj.getJSONObject(wordItem);
                 Iterator catScoreList=WordScores.keys();
                 while(catScoreList.hasNext()) {

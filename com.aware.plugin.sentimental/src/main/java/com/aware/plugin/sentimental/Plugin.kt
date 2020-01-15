@@ -103,14 +103,22 @@ open class Plugin : Aware_Plugin() {
                     override fun onKeyboard(data: ContentValues?) {
 
                         var packagesOfInterest : List<String> = listOf()
+                        var flag=0;
                         if (Aware.getSetting(applicationContext, Settings.PLUGIN_SENTIMENTAL_PACKAGES).isNotBlank()) {
+                            Log.i("ABTest", "Plugin packages is not blank ");
                             packagesOfInterest = Aware.getSetting(applicationContext, Settings.PLUGIN_SENTIMENTAL_PACKAGES).split(",")
+                            if (packagesOfInterest.contains(data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME))){
+                                flag=1;
+                            }
                         } else {
-                            packagesOfInterest.plus(data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME))
+                            Log.i("ABTest", "Plugin packages is blank ");
+                            packagesOfInterest.plus(data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME));
+                            flag=1;
                         }
 
                         Log.i("ABTest", "package data is " + data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME));
-                        if (packagesOfInterest.contains(data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME))) {
+                        //if (packagesOfInterest.contains(data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME))) {
+                        if (flag==1){
 
                             keyboardInApp = data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME)
                             textBuffer = textBuffer.plus(". ").plus(data.getAsString(Keyboard_Provider.Keyboard_Data.CURRENT_TEXT))
@@ -126,9 +134,13 @@ open class Plugin : Aware_Plugin() {
                             //log only when input ends for corrected text values only
                             // this happens when prevTextBuffer has 0 length and textBufferNew has length>0
                             if (tempCurrTextBuffer.length > 0 && tempTextBuffer.length == 0) {
+
+                                //replace the [ and ] with blanks
+                                var interstring1=textBufferNew.replace("[","");
+                                var interstring2=interstring1.replace("]","");
                                 Log.i("ABTest", "After corrections prev text is");
-                                Log.i("ABTest", textBufferNew);
-                                val testHash = Sentiment.getScoreFromInput(textBufferNew);
+                                Log.i("ABTest", interstring2);
+                                val testHash = Sentiment.getScoreFromInput(interstring2);
                             }
                             textBufferNew = tempCurrTextBuffer;
                             prevTextBuffer = tempTextBuffer;
@@ -143,9 +155,13 @@ open class Plugin : Aware_Plugin() {
 
                         if (!textBuffer.isEmpty() && currentApp != keyboardInApp) { //we were using an app of interest and changed app
 
-                            Log.i("ABTest", "Echoed before reset" + textBufferNew);
+                            //replace the [ and ] with blanks
+                            var interstring1=textBufferNew.replace("[","");
+                            var interstring2=interstring1.replace("]","");
 
-                            val testHash = Sentiment.getScoreFromInput(textBufferNew);
+                            Log.i("ABTest", "Echoed before reset" + interstring2);
+
+                            val testHash = Sentiment.getScoreFromInput(interstring2);
 
                             val contentValues = ContentValues()
                             contentValues.put(Provider.Sentimental_Data.TIMESTAMP, System.currentTimeMillis())
@@ -155,10 +171,12 @@ open class Plugin : Aware_Plugin() {
                             for ((category, score) in testHash) {
                                 contentValues.put(Provider.Sentimental_Data.WORD_CATEGORY, category as String)
                                 contentValues.put(Provider.Sentimental_Data.SENTIMENT_SCORE, score as Double)
+                                //save data only if score for category >0
+                                if (score>0.0) {
+                                    contentResolver.insert(Provider.Sentimental_Data.CONTENT_URI, contentValues) //does the actual data insert
 
-                                contentResolver.insert(Provider.Sentimental_Data.CONTENT_URI, contentValues) //does the actual data insert
-
-                                Log.i("ABTest","Inserted into database: $contentValues")
+                                    Log.i("ABTest", "Inserted into database: $contentValues")
+                                }
 
                                 awareSensor?.onTextContextChanged(contentValues)
                             }
@@ -167,6 +185,8 @@ open class Plugin : Aware_Plugin() {
                             textBufferNew = ""
                             prevTextBuffer = "";
                             keyboardInApp = ""
+                            //reset score as well
+                            Sentiment.resetScore();
                         }
                     }
                 })
