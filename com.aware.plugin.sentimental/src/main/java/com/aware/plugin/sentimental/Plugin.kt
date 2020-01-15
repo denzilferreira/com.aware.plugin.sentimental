@@ -101,7 +101,14 @@ open class Plugin : Aware_Plugin() {
                     override fun onNotification(data: ContentValues?) {}
                     override fun onBackground(data: ContentValues?) {}
                     override fun onKeyboard(data: ContentValues?) {
-                        val packagesOfInterest = Aware.getSetting(applicationContext, Settings.PLUGIN_SENTIMENTAL_PACKAGES).split(",")
+
+                        var packagesOfInterest : List<String> = listOf()
+                        if (Aware.getSetting(applicationContext, Settings.PLUGIN_SENTIMENTAL_PACKAGES).isNotBlank()) {
+                            packagesOfInterest = Aware.getSetting(applicationContext, Settings.PLUGIN_SENTIMENTAL_PACKAGES).split(",")
+                        } else {
+                            packagesOfInterest.plus(data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME))
+                        }
+
                         Log.i("ABTest", "package data is " + data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME));
                         if (packagesOfInterest.contains(data!!.getAsString(Keyboard_Provider.Keyboard_Data.PACKAGE_NAME))) {
 
@@ -150,6 +157,8 @@ open class Plugin : Aware_Plugin() {
                                 contentValues.put(Provider.Sentimental_Data.SENTIMENT_SCORE, score as Double)
 
                                 contentResolver.insert(Provider.Sentimental_Data.CONTENT_URI, contentValues) //does the actual data insert
+
+                                Log.i("ABTest","Inserted into database: $contentValues")
 
                                 awareSensor?.onTextContextChanged(contentValues)
                             }
